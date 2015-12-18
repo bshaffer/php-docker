@@ -18,20 +18,40 @@
 # A shell script for installing PHP 7.0.
 set -xe
 
+PHP_SRC=/usr/src/php7
+
 curl -SL "http://php.net/get/php-$PHP70_VERSION.tar.gz/from/this/mirror" -o php7.tar.gz
 curl -SL "http://us2.php.net/get/php-$PHP70_VERSION.tar.gz.asc/from/this/mirror" -o php7.tar.gz.asc
 gpg --verify php7.tar.gz.asc
-mkdir -p /usr/src/php7
-tar -zxf php7.tar.gz -C /usr/src/php7 --strip-components=1
+mkdir -p ${PHP_SRC}
+tar -zxf php7.tar.gz -C ${PHP_SRC} --strip-components=1
 rm php7.tar.gz
 rm php7.tar.gz.asc
 
 # TODO: Install more 3rd party extensions.
 
-# TODO: Use stable version of memcached from pecl once available
-git clone -b php7 https://github.com/php-memcached-dev/php-memcached /usr/src/php7/ext/memcached
+# TODO: Install memcache from pecl once available
+# mkdir -p ${PHP_SRC}/ext/memcache
+# curl -SL "http://pecl.php.net/get/memcache" -o memcache.tar.gz
+# tar -zxf memcache.tar.gz -C ${PHP_SRC}/ext/memcache --strip-components=1
+# rm memcache.tar.gz
 
-pushd /usr/src/php7
+# TODO: Use stable version of memcached from pecl once available
+git clone -b php7 https://github.com/php-memcached-dev/php-memcached ${PHP_SRC}/ext/memcached
+
+# No need for jsonc replacement.
+
+mkdir -p ${PHP_SRC}/ext/mailparse
+curl -SL "https://pecl.php.net/get/mailparse" -o mailparse.tar.gz
+tar -zxf mailparse.tar.gz -C ${PHP_SRC}/ext/mailparse --strip-components=1
+rm mailparse.tar.gz
+
+mkdir -p /usr/src/php/ext/apcu
+curl -SL "https://pecl.php.net/get/apcu" -o apcu.tar.gz
+tar -zxf apcu.tar.gz -C /usr/src/php/ext/apcu --strip-components=1
+rm apcu.tar.gz
+
+pushd ${PHP_SRC}
 rm -f configure
 ./buildconf --force
 ./configure \
@@ -39,6 +59,7 @@ rm -f configure
     --with-config-file-scan-dir=$APP_DIR \
     --disable-cgi \
     --disable-memcached-sasl \
+    --enable-apcu \
     --enable-bcmath=shared \
     --enable-calendar=shared \
     --enable-exif=shared \
@@ -46,6 +67,7 @@ rm -f configure
     --enable-ftp=shared \
     --enable-gd-native-ttf \
     --enable-intl=shared \
+    --enable-mailparse \
     --enable-mbstring=shared \
     --enable-memcached=shared \
     --enable-mysqlnd \
@@ -82,5 +104,8 @@ make -j"$(nproc)"
 make install
 make clean
 popd
-rm -rf /usr/src/php7
+rm -rf ${PHP_SRC}
 strip ${PHP7_DIR}/bin/php ${PHP7_DIR}/sbin/php-fpm
+
+# Install shared extensions
+${PHP7_DIR}/bin/pecl install mongodb

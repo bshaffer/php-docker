@@ -210,12 +210,11 @@ php.ini):
 - SQLite (PDO) (pdo_sqlite)
 - XMLRPC (xmlrpc)
 - XSL (xsl)
+- mongodb
 
 These extensions are only available with PHP 5.6:
 
 - memcache (shared)
-- mailparse (builtin)
-- apcu (builtin)
 - suhosin (shared, but enabled by default)
 
 ## Add something to php.ini
