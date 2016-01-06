@@ -30,12 +30,6 @@ rm php7.tar.gz.asc
 
 # TODO: Install more 3rd party extensions.
 
-# TODO: Install memcache from pecl once available
-# mkdir -p ${PHP_SRC}/ext/memcache
-# curl -SL "http://pecl.php.net/get/memcache" -o memcache.tar.gz
-# tar -zxf memcache.tar.gz -C ${PHP_SRC}/ext/memcache --strip-components=1
-# rm memcache.tar.gz
-
 # TODO: Use stable version of memcached from pecl once available
 git clone -b php7 https://github.com/php-memcached-dev/php-memcached ${PHP_SRC}/ext/memcached
 
@@ -109,3 +103,13 @@ strip ${PHP7_DIR}/bin/php ${PHP7_DIR}/sbin/php-fpm
 
 # Install shared extensions
 ${PHP7_DIR}/bin/pecl install mongodb
+
+# TODO: Use stable version of memcache from pecl once available
+git clone https://github.com/websupport-sk/pecl-memcache.git /tmp/memcache
+pushd /tmp/memcache
+${PHP7_DIR}/bin/phpize
+./configure
+make
+make install
+popd
+rm -rf /tmp/memcache
